@@ -16,6 +16,7 @@
 package com.hivemq.extensions.helloworld;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionAttributeStore;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListener;
 import com.hivemq.extension.sdk.api.events.client.parameters.AuthenticationSuccessfulInput;
 import com.hivemq.extension.sdk.api.events.client.parameters.ConnectionStartInput;
@@ -23,6 +24,10 @@ import com.hivemq.extension.sdk.api.events.client.parameters.DisconnectEventInpu
 import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * This is a very simple {@link ClientLifecycleEventListener}
@@ -37,17 +42,29 @@ public class HelloWorldListener implements ClientLifecycleEventListener {
 
     @Override
     public void onMqttConnectionStart(final @NotNull ConnectionStartInput connectionStartInput) {
-        final MqttVersion version = connectionStartInput.getConnectPacket().getMqttVersion();
-        switch (version) {
-            case V_5:
-                log.info("MQTT 5 client connected with id: {} ", connectionStartInput.getClientInformation().getClientId());
-                break;
-            case V_3_1_1:
-                log.info("MQTT 3.1.1 client connected with id: {} ", connectionStartInput.getClientInformation().getClientId());
-                break;
-            case V_3_1:
-                log.info("MQTT 3.1 client connected with id: {} ", connectionStartInput.getClientInformation().getClientId());
-                break;
+        log.info("Client id {} started mqtt connection. Getting its connection attributes...",
+                connectionStartInput.getClientInformation().getClientId());
+        // access the Connection Attribute Store via the connection information from the ConnectionStartInput interace
+        final ConnectionAttributeStore connectionAttributeStore = connectionStartInput.getConnectionInformation().getConnectionAttributeStore();
+
+        final Optional<Map<String, ByteBuffer>> optionalConnectionAttributes = connectionAttributeStore.getAll();
+
+        // verify that connection attributes are present:
+        if (optionalConnectionAttributes.isEmpty()) {
+            // If no value is present, return to handle the missing value. Another option is to set the value.
+            return;
+        }
+
+        // this operation is safe due to the previous verification that the value is present
+        final Map<String, ByteBuffer> allConnectionAttributes = optionalConnectionAttributes.get();
+
+        // iterate the entries for the given client
+        for (Map.Entry<String, ByteBuffer> entry : allConnectionAttributes.entrySet()) {
+            // CAUTION: Because the ByteBuffer is read-only, you must copy the buffer to a new byte array:
+            final ByteBuffer rewind = entry.getValue().asReadOnlyBuffer().rewind();
+            final byte[] array = new byte[rewind.remaining()];
+            rewind.get(array);
+            log.info(entry.getKey() + ":" + new String(array));
         }
     }
 

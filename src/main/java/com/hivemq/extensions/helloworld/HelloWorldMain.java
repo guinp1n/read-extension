@@ -43,7 +43,7 @@ public class HelloWorldMain implements ExtensionMain {
 
         try {
             addClientLifecycleEventListener();
-            addPublishModifier();
+            //addPublishModifier();
 
             final ExtensionInformation extensionInformation = extensionStartInput.getExtensionInformation();
             log.info("Started " + extensionInformation.getName() + ":" + extensionInformation.getVersion());
