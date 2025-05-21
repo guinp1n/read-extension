@@ -17,24 +17,17 @@ package com.hivemq.extensions.helloworld;
 
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
 import com.hivemq.extension.sdk.api.events.EventRegistry;
 import com.hivemq.extension.sdk.api.parameter.*;
 import com.hivemq.extension.sdk.api.services.Services;
-import com.hivemq.extension.sdk.api.services.intializer.InitializerRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * This is the main class of the extension,
- * which is instantiated either during the HiveMQ start up process (if extension is enabled)
- * or when HiveMQ is already started by enabling the extension.
- *
- * @author Florian Limpöck
- * @since 4.0.0
- */
 public class HelloWorldMain implements ExtensionMain {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(HelloWorldMain.class);
+    private static final @NotNull SimpleAuthenticator helloReadAuthenticator = new HelloWorldAuthenticator();
 
     @Override
     public void extensionStart(
@@ -42,8 +35,8 @@ public class HelloWorldMain implements ExtensionMain {
             final @NotNull ExtensionStartOutput extensionStartOutput) {
 
         try {
+            Services.securityRegistry().setAuthenticatorProvider(authenticatorProviderInput -> helloReadAuthenticator);
             addClientLifecycleEventListener();
-            //addPublishModifier();
 
             final ExtensionInformation extensionInformation = extensionStartInput.getExtensionInformation();
             log.info("Started " + extensionInformation.getName() + ":" + extensionInformation.getVersion());

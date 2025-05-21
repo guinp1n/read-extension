@@ -29,13 +29,7 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * This is a very simple {@link ClientLifecycleEventListener}
- * which logs the MQTT version and identifier of every connecting client.
- *
- * @author Florian Limpöck
- * @since 4.0.0
- */
+
 public class HelloWorldListener implements ClientLifecycleEventListener {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(HelloWorldListener.class);
