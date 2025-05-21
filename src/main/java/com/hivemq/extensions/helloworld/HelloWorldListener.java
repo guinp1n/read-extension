@@ -42,7 +42,7 @@ public class HelloWorldListener implements ClientLifecycleEventListener {
 
     @Override
     public void onMqttConnectionStart(final @NotNull ConnectionStartInput connectionStartInput) {
-        log.info("Client id {} started mqtt connection. Getting its connection attributes...",
+        log.info("Client id {} started mqtt connection. Read-extension is getting its connection attributes...",
                 connectionStartInput.getClientInformation().getClientId());
         // access the Connection Attribute Store via the connection information from the ConnectionStartInput interace
         final ConnectionAttributeStore connectionAttributeStore = connectionStartInput.getConnectionInformation().getConnectionAttributeStore();
