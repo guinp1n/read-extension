@@ -70,12 +70,5 @@ public class HelloWorldMain implements ExtensionMain {
         eventRegistry.setClientLifecycleEventListener(input -> helloWorldListener);
     }
 
-    private void addPublishModifier() {
-        final InitializerRegistry initializerRegistry = Services.initializerRegistry();
 
-        final HelloWorldInterceptor helloWorldInterceptor = new HelloWorldInterceptor();
-
-        initializerRegistry.setClientInitializer(
-                (initializerInput, clientContext) -> clientContext.addPublishInboundInterceptor(helloWorldInterceptor));
-    }
 }

@@ -42,29 +42,29 @@ public class HelloWorldListener implements ClientLifecycleEventListener {
 
     @Override
     public void onMqttConnectionStart(final @NotNull ConnectionStartInput connectionStartInput) {
-        log.info("Client id {} started mqtt connection. Read-extension is getting its connection attributes...",
-                connectionStartInput.getClientInformation().getClientId());
-        // access the Connection Attribute Store via the connection information from the ConnectionStartInput interace
-        final ConnectionAttributeStore connectionAttributeStore = connectionStartInput.getConnectionInformation().getConnectionAttributeStore();
+        final String clientId = connectionStartInput.getClientInformation().getClientId();
+        log.info("onMqttConnectionStart – clientId {}. Read-extension is getting its connection attributes...",
+                clientId);
+
+        final ConnectionAttributeStore connectionAttributeStore = connectionStartInput
+                .getConnectionInformation()
+                .getConnectionAttributeStore();
 
         final Optional<Map<String, ByteBuffer>> optionalConnectionAttributes = connectionAttributeStore.getAll();
 
-        // verify that connection attributes are present:
         if (optionalConnectionAttributes.isEmpty()) {
-            // If no value is present, return to handle the missing value. Another option is to set the value.
             return;
         }
 
-        // this operation is safe due to the previous verification that the value is present
         final Map<String, ByteBuffer> allConnectionAttributes = optionalConnectionAttributes.get();
 
-        // iterate the entries for the given client
         for (Map.Entry<String, ByteBuffer> entry : allConnectionAttributes.entrySet()) {
-            // CAUTION: Because the ByteBuffer is read-only, you must copy the buffer to a new byte array:
             final ByteBuffer rewind = entry.getValue().asReadOnlyBuffer().rewind();
             final byte[] array = new byte[rewind.remaining()];
             rewind.get(array);
-            log.info(entry.getKey() + ":" + new String(array));
+            final String key = entry.getKey();
+            final String value = new String(array);
+            log.info("onMqttConnectionStart – clientId {}, Key: {}, Value: {}", clientId, key, value);
         }
     }
 
@@ -75,6 +75,6 @@ public class HelloWorldListener implements ClientLifecycleEventListener {
 
     @Override
     public void onDisconnect(final @NotNull DisconnectEventInput disconnectEventInput) {
-        log.info("Client disconnected with id: {} ", disconnectEventInput.getClientInformation().getClientId());
+        log.info("onDisconnect  – read-extension    – Client disconnected with id: {} ", disconnectEventInput.getClientInformation().getClientId());
     }
 }
